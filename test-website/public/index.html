@@ -99,21 +99,21 @@
         <div class="cart-box">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h4 style="margin: 0;">Shopping Cart (<span id="cart-count">0</span> items)</h4>
-            <button class="btn-clear" onclick="clearCart()">🗑️ Clear Cart</button>
+            <button id="btn-clear-cart" class="btn-clear" onclick="clearCart()" style="display: none;">🗑️ Clear Cart</button>
           </div>
 
           <div id="cart-items-list" class="cart-items">
             <p style="font-size: 13px; color: #64748b; text-align: center; margin: 18px 0;">Your cart is empty. Click "+ Add to Cart" on any service above.</p>
           </div>
 
-          <div class="cart-totals">
+          <div class="cart-totals" id="cart-totals-box" style="display: none;">
             <div class="total-row"><span>Subtotal:</span><span id="cart-subtotal">$0.00</span></div>
             <div class="total-row"><span>Estimated Tax:</span><span id="cart-tax">$0.00</span></div>
             <div class="total-row total-highlight"><span>Total Due:</span><span id="cart-total" style="color: #6ee7b7;">$0.00</span></div>
           </div>
 
           <button id="btn-normal-checkout" class="btn-checkout" onclick="performNormalCheckout()" disabled style="opacity: 0.5; cursor: not-allowed;">
-            Cart Empty • $0.00
+            Cart Empty
           </button>
         </div>
       </section>

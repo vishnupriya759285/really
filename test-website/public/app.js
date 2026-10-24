@@ -8,6 +8,8 @@ function updateCartUI() {
   const taxSpan = document.getElementById('cart-tax');
   const totalSpan = document.getElementById('cart-total');
   const checkoutBtn = document.getElementById('btn-normal-checkout');
+  const totalsBox = document.getElementById('cart-totals-box');
+  const clearBtn = document.getElementById('btn-clear-cart');
 
   if (!list) return;
 
@@ -16,17 +18,19 @@ function updateCartUI() {
 
   if (cart.length === 0) {
     list.innerHTML = `<p style="font-size: 13px; color: #64748b; text-align: center; margin: 18px 0;">Your cart is empty. Click "+ Add to Cart" on any service above.</p>`;
-    subtotalSpan.innerText = '$0.00';
-    taxSpan.innerText = '$0.00';
-    totalSpan.innerText = '$0.00';
+    if (totalsBox) totalsBox.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
     if (checkoutBtn) {
-      checkoutBtn.innerText = 'Cart Empty • $0.00';
+      checkoutBtn.innerText = 'Cart Empty';
       checkoutBtn.disabled = true;
       checkoutBtn.style.opacity = '0.5';
       checkoutBtn.style.cursor = 'not-allowed';
     }
     return;
   }
+
+  if (totalsBox) totalsBox.style.display = 'block';
+  if (clearBtn) clearBtn.style.display = 'inline-block';
 
   let subtotal = 0;
   let tax = 0;

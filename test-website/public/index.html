@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaPay Cloud Store — Standalone Target Application (Port 4000)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="store-header">
+    <div class="header-container">
+      <div class="store-brand">
+        <div class="store-logo">💳</div>
+        <div>
+          <span class="store-name">NovaPay Store</span>
+          <span class="port-tag">Running on Port 4000 (Target App)</span>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <div class="really-link-box">
+          <span class="pulse-dot"></span>
+          <span>Really Server: <a href="http://localhost:3000" target="_blank" style="color: #6ee7b7; text-decoration: underline;">http://localhost:3000</a></span>
+        </div>
+        <button id="btn-open-report-manual" class="btn-report-header" onclick="openTelemetryModal()">
+          🚨 Send Telemetry Bug Report
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="store-main">
+    <!-- Notice Banner -->
+    <div class="connection-banner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 24px;">📡</span>
+        <div>
+          <strong>Standalone Target Client Application (Port 4000)</strong>
+          <p style="margin: 2px 0 0; font-size: 13px; color: #cbd5e1;">
+            This is an external client web app. When you click <strong>"Report"</strong> or trigger any bug, all JavaScript errors, network traces, console logs, and click trails are automatically dispatched to the Really Bot server on <strong>Port 3000</strong> where the Gemini Bot understands it, outlines steps to reproduce, offers suggestions, and creates a PR.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-grid">
+      <!-- Left Column: E-commerce Storefront -->
+      <section class="store-section">
+        <div class="section-title">
+          <h3>Cloud Products & API Services</h3>
+          <span class="badge badge-online">Catalog Live</span>
+        </div>
+
+        <div class="product-grid">
+          <div class="product-card">
+            <h4>DevTwin Autonomous QA Agent</h4>
+            <p>AI agent that reproduces and verifies runtime bugs with proof.</p>
+            <div class="card-footer">
+              <span class="price">$49.00</span>
+              <button class="btn-add" onclick="addToCart('DevTwin Autonomous QA Agent', 49.00, 0.08)">+ Add to Cart</button>
+            </div>
+          </div>
+
+          <div class="product-card">
+            <h4>Cloud GPU Inference Pod (A100)</h4>
+            <p>Dedicated high-throughput GPU cluster for LLM deployments.</p>
+            <div class="card-footer">
+              <span class="price">$199.00</span>
+              <button class="btn-add" onclick="addToCart('Cloud GPU Inference Pod (A100)', 199.00, 0.08)">+ Add to Cart</button>
+            </div>
+          </div>
+
+          <div class="product-card">
+            <h4>Enterprise Log Ingest Pipeline</h4>
+            <p>10 TB/month real-time stack trace and telemetry ingestion stream.</p>
+            <div class="card-footer">
+              <span class="price">$350.00</span>
+              <button class="btn-add" onclick="addToCart('Enterprise Log Ingest Pipeline', 350.00, 0.08)">+ Add to Cart</button>
+            </div>
+          </div>
+
+          <div class="product-card">
+            <h4>Hardware Security FIDO2 USB-C Key</h4>
+            <p>Cryptographic token for zero-trust developer authentication.</p>
+            <div class="card-footer">
+              <span class="price">$35.00</span>
+              <button class="btn-add" onclick="addToCart('Hardware Security FIDO2 USB-C Key', 35.00, 0.05)">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="cart-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="margin: 0;">Shopping Cart (<span id="cart-count">2</span> items)</h4>
+            <button class="btn-clear" onclick="clearCart()">Clear</button>
+          </div>
+
+          <div id="cart-items-list" class="cart-items">
+            <!-- Dynamic items -->
+          </div>
+
+          <div class="cart-totals">
+            <div class="total-row"><span>Subtotal:</span><span id="cart-subtotal">$248.00</span></div>
+            <div class="total-row"><span>Estimated Tax:</span><span id="cart-tax">$19.84</span></div>
+            <div class="total-row total-highlight"><span>Total Due:</span><span id="cart-total" style="color: #6ee7b7;">$267.84</span></div>
+          </div>
+
+          <button id="btn-normal-checkout" class="btn-checkout" onclick="performNormalCheckout()">
+            Standard Checkout ($<span id="checkout-total-btn">267.84</span>)
+          </button>
+        </div>
+      </section>
+
+      <!-- Right Column: Bug Trigger Scenarios -->
+      <section class="bugs-section">
+        <div class="section-title">
+          <h3>🐞 Live Bug Ingestion Scenarios</h3>
+          <span class="badge badge-sim">Simulated Faults</span>
+        </div>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 16px;">
+          Trigger actual runtime failures in this client web app. The client telemetry SDK captures the JS error, network status, console logs, and click trails, and sends them to Really's Gemini Bot server.
+        </p>
+
+        <div class="bug-list">
+          <!-- Bug 1 -->
+          <div class="bug-card bug-danger">
+            <div class="bug-header">
+              <strong>1. Checkout Tax Null Pointer Crash</strong>
+              <span class="pill pill-danger">TypeError</span>
+            </div>
+            <p>Triggers tax calculation on malformed item payload without boundary validation in <code>services/checkout.js</code>.</p>
+            <button id="btn-trigger-cart-crash" class="btn-trigger btn-trigger-danger" onclick="triggerCheckoutCrash()">
+              💥 Trigger Checkout Tax Crash (POST /api/checkout)
+            </button>
+          </div>
+
+          <!-- Bug 2 -->
+          <div class="bug-card bug-warning">
+            <div class="bug-header">
+              <strong>2. Webhook Ingest Missing Customer</strong>
+              <span class="pill pill-warning">HTTP 500</span>
+            </div>
+            <p>Dispatches mock Stripe payment failure webhook missing customer ID in <code>services/billing.js</code>.</p>
+            <button id="btn-trigger-webhook-crash" class="btn-trigger btn-trigger-warning" onclick="triggerWebhookCrash()">
+              💥 Trigger Webhook Crash (POST /api/webhooks/stripe)
+            </button>
+          </div>
+
+          <!-- Bug 3 -->
+          <div class="bug-card bug-primary">
+            <div class="bug-header">
+              <strong>3. Concurrent Token Rotation Race Condition</strong>
+              <span class="pill pill-primary">HTTP 409</span>
+            </div>
+            <p>Simulates duplicate refresh requests colliding in <code>services/auth.js</code>.</p>
+            <button id="btn-trigger-race-crash" class="btn-trigger btn-trigger-primary" onclick="triggerRaceCondition()">
+              💥 Trigger Auth Race Condition (POST /api/auth/refresh)
+            </button>
+          </div>
+
+          <!-- Bug 4 -->
+          <div class="bug-card bug-cyan">
+            <div class="bug-header">
+              <strong>4. SQL Query Syntax Negative Offset</strong>
+              <span class="pill pill-cyan">DatabaseError</span>
+            </div>
+            <p>Queries customer analytics with invalid boundary offset in <code>services/db.js</code>.</p>
+            <button id="btn-trigger-sql-crash" class="btn-trigger btn-trigger-cyan" onclick="triggerSqlError()">
+              💥 Trigger SQL Query Error (GET /api/analytics?page=-1)
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Telemetry Report Modal -->
+  <div id="telemetry-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 24px;">🚨</span>
+          <div>
+            <h3 style="margin: 0; color: #f43f5e;">Client Telemetry Crash Report</h3>
+            <span style="font-size: 12px; color: #94a3b8;">Captured by NovaPay Telemetry SDK (Port 4000)</span>
+          </div>
+        </div>
+        <button class="btn-close" onclick="closeTelemetryModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="margin-bottom: 14px;">
+          <strong id="modal-error-title" style="color: #fff; font-size: 15px;">TypeError: Cannot read properties of undefined</strong>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">
+            Target Really Server: <code>http://localhost:3000/api/telemetry</code>
+          </div>
+        </div>
+
+        <!-- Telemetry Breakdown Tabs/Panels -->
+        <div class="telemetry-panel">
+          <div class="panel-label">1. JavaScript Exception & Stack Trace</div>
+          <pre id="modal-stack-trace" class="code-snippet" style="color: #fda4af;">Loading...</pre>
+        </div>
+
+        <div class="telemetry-panel">
+          <div class="panel-label">2. Recent Network Requests (Fetch / XHR)</div>
+          <pre id="modal-network-logs" class="code-snippet" style="color: #93c5fd;">Loading...</pre>
+        </div>
+
+        <div class="telemetry-panel">
+          <div class="panel-label">3. Console Logs Captured</div>
+          <pre id="modal-console-logs" class="code-snippet" style="color: #cbd5e1;">Loading...</pre>
+        </div>
+
+        <div class="telemetry-panel">
+          <div class="panel-label">4. User Click & Interaction Trail</div>
+          <pre id="modal-breadcrumbs" class="code-snippet" style="color: #a7f3d0;">Loading...</pre>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeTelemetryModal()">Dismiss</button>
+        <button id="btn-send-to-really" class="btn-send-really" onclick="transmitTelemetryToReally()">
+          🚀 Send to Really Bot Server (Port 3000) →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Notification Banner -->
+  <div id="toast-success" class="toast-box" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 14px;">
+      <div>
+        <strong style="color: #10b981; font-size: 14px;">✓ Telemetry Ingested by Gemini Bot!</strong>
+        <p id="toast-msg" style="margin: 2px 0 0; font-size: 13px; color: #e2e8f0;">
+          Session created on http://localhost:3000. Gemini Bot generated steps to reproduce and suggestion.
+        </p>
+      </div>
+      <a id="toast-link" href="#" target="_blank" class="btn-view-pr">
+        View Session & Ask for PR →
+      </a>
+    </div>
+  </div>
+
+  <script src="/telemetry.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

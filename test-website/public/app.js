@@ -1,8 +1,5 @@
 // NovaPay Client Storefront Application & Bug Dispatcher
-const cart = [
-  { name: 'DevTwin Autonomous QA Agent', price: 49.00, quantity: 1, taxRate: { multiplier: 0.08 } },
-  { name: 'Cloud GPU Inference Pod (A100)', price: 199.00, quantity: 1, taxRate: { multiplier: 0.08 } }
-];
+const cart = [];
 
 function updateCartUI() {
   const list = document.getElementById('cart-items-list');
@@ -10,18 +7,24 @@ function updateCartUI() {
   const subtotalSpan = document.getElementById('cart-subtotal');
   const taxSpan = document.getElementById('cart-tax');
   const totalSpan = document.getElementById('cart-total');
-  const checkoutBtnSpan = document.getElementById('checkout-total-btn');
+  const checkoutBtn = document.getElementById('btn-normal-checkout');
 
   if (!list) return;
 
-  countSpan.innerText = cart.length;
+  const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+  countSpan.innerText = totalQuantity;
 
   if (cart.length === 0) {
-    list.innerHTML = `<p style="font-size: 13px; color: #64748b; text-align: center; margin: 10px 0;">Cart is empty.</p>`;
+    list.innerHTML = `<p style="font-size: 13px; color: #64748b; text-align: center; margin: 18px 0;">Your cart is empty. Click "+ Add to Cart" on any service above.</p>`;
     subtotalSpan.innerText = '$0.00';
     taxSpan.innerText = '$0.00';
     totalSpan.innerText = '$0.00';
-    checkoutBtnSpan.innerText = '0.00';
+    if (checkoutBtn) {
+      checkoutBtn.innerText = 'Cart Empty • $0.00';
+      checkoutBtn.disabled = true;
+      checkoutBtn.style.opacity = '0.5';
+      checkoutBtn.style.cursor = 'not-allowed';
+    }
     return;
   }
 
@@ -29,16 +32,25 @@ function updateCartUI() {
   let tax = 0;
 
   list.innerHTML = cart.map((item, idx) => {
-    subtotal += item.price * item.quantity;
+    const itemTotal = item.price * item.quantity;
+    subtotal += itemTotal;
     const rate = item.taxRate ? item.taxRate.multiplier : 0;
-    tax += (item.price * item.quantity) * rate;
+    tax += itemTotal * rate;
 
     return `
-      <div class="cart-item-row">
-        <span>${escapeHtml(item.name)} (x${item.quantity})</span>
+      <div class="cart-item-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+        <div>
+          <strong style="font-size: 13px; color: #f8fafc;">${escapeHtml(item.name)}</strong>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">$${item.price.toFixed(2)} each</div>
+        </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-          <strong>$${(item.price * item.quantity).toFixed(2)}</strong>
-          <button style="background: none; border: none; color: #f43f5e; cursor: pointer;" onclick="removeFromCart(${idx})">✕</button>
+          <div style="display: flex; align-items: center; gap: 6px; background: #060911; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 4px; padding: 2px 6px;">
+            <button style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 13px; font-weight: bold; padding: 0 4px;" onclick="decrementCartItem(${idx})">−</button>
+            <span style="font-size: 12px; font-weight: 700; color: #fff; min-width: 16px; text-align: center;">${item.quantity}</span>
+            <button style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 13px; font-weight: bold; padding: 0 4px;" onclick="incrementCartItem(${idx})">+</button>
+          </div>
+          <strong style="color: #6ee7b7; font-size: 13px; min-width: 65px; text-align: right;">$${itemTotal.toFixed(2)}</strong>
+          <button style="background: none; border: none; color: #f43f5e; cursor: pointer; font-size: 14px; margin-left: 4px;" title="Remove item" onclick="removeFromCart(${idx})">✕</button>
         </div>
       </div>
     `;
@@ -48,17 +60,44 @@ function updateCartUI() {
   subtotalSpan.innerText = `$${subtotal.toFixed(2)}`;
   taxSpan.innerText = `$${tax.toFixed(2)}`;
   totalSpan.innerText = `$${total.toFixed(2)}`;
-  checkoutBtnSpan.innerText = total.toFixed(2);
+  if (checkoutBtn) {
+    checkoutBtn.innerText = `Proceed to Checkout • $${total.toFixed(2)}`;
+    checkoutBtn.disabled = false;
+    checkoutBtn.style.opacity = '1';
+    checkoutBtn.style.cursor = 'pointer';
+  }
 }
 
 function addToCart(name, price, taxRateMultiplier) {
-  cart.push({
-    name,
-    price,
-    quantity: 1,
-    taxRate: { multiplier: taxRateMultiplier }
-  });
+  const existing = cart.find(item => item.name === name);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({
+      name,
+      price,
+      quantity: 1,
+      taxRate: { multiplier: taxRateMultiplier }
+    });
+  }
   updateCartUI();
+}
+
+function incrementCartItem(idx) {
+  if (cart[idx]) {
+    cart[idx].quantity += 1;
+    updateCartUI();
+  }
+}
+
+function decrementCartItem(idx) {
+  if (cart[idx]) {
+    cart[idx].quantity -= 1;
+    if (cart[idx].quantity <= 0) {
+      cart.splice(idx, 1);
+    }
+    updateCartUI();
+  }
 }
 
 function removeFromCart(idx) {
@@ -73,7 +112,7 @@ function clearCart() {
 
 async function performNormalCheckout() {
   if (cart.length === 0) {
-    alert("Cart is empty! Please add items first.");
+    alert("Cart is empty! Please click '+ Add to Cart' on a service first.");
     return;
   }
 

@@ -97,41 +97,67 @@ function renderLanding() {
   container.innerHTML = `
     <section class="hero-section" id="landing-hero">
       <div class="hero-pill">
-        <span>✨ Autonomous Debugging & QA Twin</span>
+        <span>⚡ BugTwin — Autonomous Bug Reproduction & Devin-Class Coding Twin</span>
       </div>
-      <h1 class="hero-title">Reproduce Runtime Bugs.<br>Verify Fixes with Proof.</h1>
-      <p class="hero-subtitle">
-        Really transforms confusing production error logs into automated reproduction tests,
-        generates targeted code patches, and proves verification through actual test executions.
+      <h1 class="hero-title" style="font-size: 42px; line-height: 1.2; margin: 18px 0 16px;">Turn Hard-to-Reproduce Bugs<br>Into Reliable Regression Tests.</h1>
+      <p class="hero-subtitle" style="max-width: 820px; font-size: 16px; line-height: 1.6; color: var(--text-muted); margin: 0 auto 28px;">
+        BugTwin captures sanitized execution traces, recreates failures in an isolated environment, identifies likely root causes, and uses AI coding agents like Devin to implement and verify fixes. Instead of spending hours debugging issues that only occur in certain environments or under specific conditions, developers can reproduce, fix, and prevent the same bugs from returning through one streamlined workflow.
       </p>
-      <div class="hero-actions">
-        <button id="btn-launch-dashboard" class="btn-primary" onclick="navigate('/dashboard')">Open Dashboard</button>
-        <button id="btn-quick-new" class="btn-secondary" onclick="navigate('/sessions/new')">+ Submit Bug Report</button>
+
+      <div class="hero-actions" style="margin-bottom: 40px;">
+        <button id="btn-launch-dashboard" class="btn-primary" onclick="navigate('/dashboard')">Open BugTwin Dashboard</button>
+        <button id="btn-quick-new" class="btn-secondary" onclick="navigate('/sessions/new')">+ Submit Execution Trace</button>
+        <a id="btn-hero-client" class="btn-secondary" style="border: 1px solid var(--accent-cyan); color: var(--accent-cyan); background: rgba(6, 182, 212, 0.1); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;" href="http://localhost:4000" target="_blank">🌐 Test on Client App (Port 4000) ↗</a>
+      </div>
+
+      <!-- End-to-End Workflow Diagram Bar -->
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px; margin-bottom: 36px; text-align: left;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
+          The BugTwin Autonomous Lifecycle
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px;">
+            <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px;">1. Trace Ingestion</div>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Captures console logs, network requests, stack traces, and click trails with automatic PII sanitization.</p>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px;">
+            <div style="font-size: 13px; font-weight: 700; color: #fca5a5; margin-bottom: 4px;">2. Isolated Sandbox</div>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Recreates the exact failure in a hermetic container, yielding confirmed Exit Code 1 proof.</p>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px;">
+            <div style="font-size: 13px; font-weight: 700; color: #93c5fd; margin-bottom: 4px;">3. AI Root Cause</div>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Gemini AI identifies the faulty file, failing function, and writes developer reproduction steps.</p>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px;">
+            <div style="font-size: 13px; font-weight: 700; color: #86efac; margin-bottom: 4px;">4. Devin AI & PR Merge</div>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Coding Twin drafts fix, verifies Exit Code 0, opens PR, and stores test in regression suite.</p>
+          </div>
+        </div>
       </div>
 
       <div class="feature-grid">
         <div class="card" id="card-feature-ingest">
-          <div class="card-icon">⚡</div>
-          <h3>Log & Trace Ingestion</h3>
-          <p>Extract stack frames, components, and runtime environments directly from raw error logs and trace dumps.</p>
+          <div class="card-icon">📡</div>
+          <h3>Sanitized Trace Capture</h3>
+          <p>Zero manual reproduction notes. Captures user breadcrumbs, recent network calls, and exception frames straight from production or staging.</p>
         </div>
 
         <div class="card" id="card-feature-repro">
           <div class="card-icon">🧪</div>
-          <h3>Simulated Reproduction</h3>
-          <p>Generates isolated reproduction test cases to recreate the exact failure condition in sandbox simulation.</p>
+          <h3>Isolated Failure Recreation</h3>
+          <p>Turns elusive, environment-dependent bugs into reliable, deterministic test scripts executed in an isolated sandbox.</p>
         </div>
 
         <div class="card" id="card-feature-diff">
-          <div class="card-icon">🛠️</div>
-          <h3>Verified Code Diffs</h3>
-          <p>Proposes minimal, defensive patches with verification strictly backed by empirical test execution results.</p>
+          <div class="card-icon">🤖</div>
+          <h3>Devin-Class AI Coding Twin</h3>
+          <p>Generates targeted code diffs and proves correctness with test execution results before human review.</p>
         </div>
 
         <div class="card" id="card-feature-regression">
           <div class="card-icon">🛡️</div>
-          <h3>Regression Test Library</h3>
-          <p>Automatically promotes verified reproduction test cases into an enduring regression test suite.</p>
+          <h3>Permanent Regression Library</h3>
+          <p>Verified test scripts automatically graduate into your permanent test suite so the same bug can never recur.</p>
         </div>
       </div>
     </section>
@@ -391,19 +417,19 @@ async function renderSessionDetail(sessionId) {
 
       <!-- Workflow Progress Stepper -->
       <div class="stepper" id="workflow-stepper">
-        <div class="step-item completed">1. Log Ingested</div>
-        <div class="step-item ${analysis ? 'completed' : 'active'}">2. Root Cause & Gemini Bot</div>
-        <div class="step-item ${reproduction ? 'completed' : ''}">3. Bug Reproduction</div>
-        <div class="step-item ${fix ? 'completed' : ''}">4. Proposed Code Diff</div>
-        <div class="step-item ${fix && fix.verification_status === 'VERIFIED_BY_TEST_RUN' ? 'completed' : ''}">5. Verified by Test</div>
-        <div class="step-item ${pr ? (pr.status === 'merged' ? 'completed' : 'active') : ''}">6. Pull Request (${pr ? pr.status.toUpperCase() : 'PENDING'})</div>
+        <div class="step-item completed">1. Sanitized Trace</div>
+        <div class="step-item ${analysis ? 'completed' : 'active'}">2. Gemini Root Cause</div>
+        <div class="step-item ${reproduction ? 'completed' : ''}">3. Sandbox Reproduction (Exit 1)</div>
+        <div class="step-item ${fix ? 'completed' : ''}">4. Devin Coding Twin Fix</div>
+        <div class="step-item ${fix && fix.verification_status === 'VERIFIED_BY_TEST_RUN' ? 'completed' : ''}">5. Verified with Proof (Exit 0)</div>
+        <div class="step-item ${pr ? (pr.status === 'merged' ? 'completed' : 'active') : ''}">6. PR & Regression Suite (${pr ? pr.status.toUpperCase() : 'PENDING'})</div>
       </div>
 
       <!-- Raw Log Context Card -->
       <div class="workflow-card" id="card-raw-logs">
         <div class="workflow-header">
-          <h3>Original Runtime Error Log</h3>
-          <span class="badge badge-status">STACK CAPTURE</span>
+          <h3>Sanitized Execution Trace & Error Log</h3>
+          <span class="badge badge-status">TRACE CAPTURED</span>
         </div>
         <div class="code-box">${escapeHtml(session.error_logs)}</div>
       </div>
@@ -462,8 +488,8 @@ async function renderSessionDetail(sessionId) {
         <div class="workflow-card" id="card-reproduction-results">
           <div class="workflow-header">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <h3>Automated Reproduction Results</h3>
-              <span class="badge badge-simulated">${reproduction.simulation_label || 'SIMULATED'}</span>
+              <h3>Isolated Sandbox Failure Recreation</h3>
+              <span class="badge badge-simulated">${reproduction.simulation_label || 'HERMETIC_SANDBOX'}</span>
             </div>
             <span class="badge ${reproduction.exit_code === 1 ? 'badge-simulated' : 'badge-unverified'}">
               ${reproduction.exit_code === 1 ? 'BUG REPRODUCED (EXIT 1)' : 'REPRODUCTION FAILED'}
@@ -471,12 +497,12 @@ async function renderSessionDetail(sessionId) {
           </div>
 
           <div style="margin-bottom: 12px;">
-            <span class="stat-label">Sandbox Reproduction Console Output</span>
+            <span class="stat-label">Isolated Sandbox Console Output</span>
             <div class="code-box" style="color: #fca5a5;">${escapeHtml(reproduction.stdout)}</div>
           </div>
 
           <div>
-            <span class="stat-label">Generated Reproduction Test Script</span>
+            <span class="stat-label">Standalone Deterministic Reproduction Test</span>
             <div class="code-box">${escapeHtml(reproduction.reproduction_code)}</div>
           </div>
         </div>
@@ -487,7 +513,7 @@ async function renderSessionDetail(sessionId) {
         <div class="workflow-card" id="card-proposed-diff">
           <div class="workflow-header">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <h3>Proposed Code Patch Diff</h3>
+              <h3>Devin-Class AI Coding Twin — Verified Fix Diff</h3>
               ${fix.verification_status === 'VERIFIED_BY_TEST_RUN' 
                 ? '<span class="badge badge-verified">VERIFIED BY TEST EXECUTION</span>' 
                 : '<span class="badge badge-unverified">UNVERIFIED FIX</span>'}

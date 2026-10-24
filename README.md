@@ -1,6 +1,6 @@
-# Really — Autonomous Bug Reproduction, Gemini Bot & Verification Twin
+# BugTwin — Autonomous Bug Reproduction, AI Coding Twin & Regression Prevention
 
-> Autonomous AI debugging platform that captures runtime client errors, synthesizes reproduction test cases using the Gemini API, proposes verified code diffs, and orchestrates the full Pull Request (PR) lifecycle.
+> **BugTwin** is a developer tool that turns hard-to-reproduce software bugs into reliable, automated regression tests. It captures sanitized execution traces, recreates failures in an isolated environment, identifies likely root causes, and uses AI coding agents like Devin to implement and verify fixes. Instead of spending hours debugging issues that only occur in certain environments or under specific conditions, developers can reproduce, fix, and prevent the same bugs from returning through one streamlined workflow.
 
 ---
 

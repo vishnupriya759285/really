@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Really — Autonomous Bug Reproduction & Verification Twin</title>
-  <meta name="description" content="AI-assisted debugging platform turning runtime logs into reproducible test suites, verified code diffs, and regression assets.">
+  <title>BugTwin — Turn Hard-to-Reproduce Bugs into Automated Regression Tests</title>
+  <meta name="description" content="BugTwin captures sanitized execution traces, recreates failures in isolated environments, identifies likely root causes, and uses AI coding agents to implement and verify fixes.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,16 +16,16 @@
     <header class="app-header">
       <div class="header-container">
         <div class="brand" id="brand-logo" onclick="navigate('/')">
-          <div class="brand-badge">R</div>
-          <span class="brand-name">Really</span>
-          <span class="version-tag">v1.0 QA</span>
+          <div class="brand-badge" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; font-weight: 900;">⚡</div>
+          <span class="brand-name">BugTwin</span>
+          <span class="version-tag">AI Coding Twin</span>
         </div>
         <nav class="nav-links">
           <button id="nav-btn-landing" class="nav-btn" onclick="navigate('/')">Home</button>
           <button id="nav-btn-dashboard" class="nav-btn" onclick="navigate('/dashboard')">Dashboard</button>
           <button id="nav-btn-new-session" class="nav-btn primary" onclick="navigate('/sessions/new')">+ New Session</button>
           <button id="nav-btn-regressions" class="nav-btn" onclick="navigate('/regression')">Regression Library</button>
-          <a id="nav-btn-external-app" class="nav-btn" style="border: 1px solid var(--accent-cyan); color: var(--accent-cyan); background: rgba(6, 182, 212, 0.1); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;" href="http://localhost:4000" target="_blank">🌐 Client App (Port 4000) ↗</a>
+          <a id="nav-btn-external-app" class="nav-btn" style="border: 1px solid var(--accent-cyan); color: var(--accent-cyan); background: rgba(6, 182, 212, 0.1); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;" href="http://localhost:4000" target="_blank">🌐 Target Client App (Port 4000) ↗</a>
         </nav>
       </div>
     </header>
@@ -38,10 +38,10 @@
     <!-- System Integrity Notice Footer -->
     <footer class="app-footer">
       <div class="footer-container">
-        <p>Really QA Verification Platform &copy; 2026. All sandbox executions explicitly disclosed.</p>
+        <p>BugTwin Autonomous Bug Reproduction & Verification Engine &copy; 2026. Powered by Google Gemini AI & Devin-Class Coding Agents.</p>
         <div class="footer-disclaimer">
           <span class="badge badge-simulated">TRANSPARENCY</span>
-          AI root cause generation and sandbox reproduction operate in simulated containers. Fixes are only marked verified when backed by actual test runner execution output.
+          AI root cause generation and sandbox reproduction operate in isolated environments. Fixes are only marked verified when backed by actual test runner execution output (Exit Code 0).
         </div>
       </div>
     </footer>

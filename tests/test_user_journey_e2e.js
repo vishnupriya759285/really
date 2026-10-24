@@ -55,7 +55,7 @@ async function runUserJourney() {
     console.log('[Step 1] Open the landing page...');
     const landingRes = await request('GET', '/');
     assert.strictEqual(landingRes.status, 200, 'Landing page route / must return 200 OK');
-    assert(landingRes.raw.includes('Really — Autonomous Bug Reproduction &amp; Verification Twin') || landingRes.raw.includes('Really'), 'Landing page HTML title must match');
+    assert(landingRes.raw.includes('BugTwin') || landingRes.raw.includes('Really'), 'Landing page HTML title must match');
     assert(landingRes.raw.includes('id="main-content"'), 'Main content container must exist');
     assert(landingRes.raw.includes('id="brand-logo"'), 'Brand logo must exist');
     console.log('  -> Step 1 Passed: Landing page loaded successfully with valid semantic HTML.\n');

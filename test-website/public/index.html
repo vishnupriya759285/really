@@ -25,7 +25,7 @@
         <div class="really-link-box" id="server-status-pill">
           <span class="pulse-dot" id="server-status-dot"></span>
           <span>BugTwin Server: <a id="server-status-link" href="http://localhost:3000" target="_blank" style="color: #6ee7b7; text-decoration: underline;">http://localhost:3000</a></span>
-          <button onclick="openServerConfigModal()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; margin-left: 6px;">⚙️ Change</button>
+          <button id="btn-open-server-config" class="btn-config-pill" onclick="openServerConfigModal()">⚙️ Change</button>
         </div>
         <button id="btn-open-report-manual" class="btn-report-header" onclick="openTelemetryModal()">
           🚨 Send Telemetry Bug Report
@@ -235,8 +235,8 @@
   </div>
 
   <!-- Server Configuration Modal -->
-  <div id="server-config-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-card" style="max-width: 520px;">
+  <div id="server-config-modal" class="modal-backdrop modal-overlay" style="display: none;" onclick="if(event.target === this) closeServerConfigModal()">
+    <div class="modal-box modal-card" style="max-width: 520px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="font-size: 22px;">⚙️</span>

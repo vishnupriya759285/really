@@ -309,21 +309,30 @@ async function transmitTelemetryToReally() {
 
 // Server Configuration Modal Management
 function openServerConfigModal() {
+  const modal = document.getElementById('server-config-modal');
+  if (!modal) return;
   const current = window.TelemetryTracker.getServerUrl();
   const input = document.getElementById('config-server-input');
-  if (input) input.value = current;
+  if (input) {
+    input.value = current;
+    setTimeout(() => input.focus(), 50);
+  }
   const resultDiv = document.getElementById('connection-test-result');
   if (resultDiv) resultDiv.style.display = 'none';
-  document.getElementById('server-config-modal').style.display = 'flex';
+  modal.style.display = 'flex';
 }
 
 function closeServerConfigModal() {
-  document.getElementById('server-config-modal').style.display = 'none';
+  const modal = document.getElementById('server-config-modal');
+  if (modal) modal.style.display = 'none';
 }
 
 function setPresetServer(url) {
   const input = document.getElementById('config-server-input');
-  if (input) input.value = url;
+  if (input) {
+    input.value = url;
+    input.focus();
+  }
 }
 
 async function testConnectionFromModal() {
@@ -390,7 +399,35 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// Global window exposure for inline and external calls
+window.openServerConfigModal = openServerConfigModal;
+window.closeServerConfigModal = closeServerConfigModal;
+window.setPresetServer = setPresetServer;
+window.testConnectionFromModal = testConnectionFromModal;
+window.saveServerConfigFromModal = saveServerConfigFromModal;
+window.refreshServerDisplay = refreshServerDisplay;
+window.openTelemetryModal = openTelemetryModal;
+window.closeTelemetryModal = closeTelemetryModal;
+window.transmitTelemetryToReally = transmitTelemetryToReally;
+
 document.addEventListener('DOMContentLoaded', () => {
   updateCartUI();
   refreshServerDisplay();
+
+  // Explicit event listener binding as backup
+  const cfgBtn = document.getElementById('btn-open-server-config');
+  if (cfgBtn) {
+    cfgBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openServerConfigModal();
+    });
+  }
+
+  // Close modals on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeServerConfigModal();
+      closeTelemetryModal();
+    }
+  });
 });

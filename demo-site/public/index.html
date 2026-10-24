@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugTwin — Live Interactive AI Debugging Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="site-wrapper">
+    <!-- Top Global Header -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-badge">
+          <span class="brand-spark">⚡</span>
+        </div>
+        <div class="brand-names">
+          <span class="logo-title">BugTwin</span>
+          <span class="logo-sub">Autonomous Bug Reproduction & Test Synthesis</span>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <div class="live-pill">
+          <span class="pulse-dot"></span>
+          <span id="openAiStatusLabel">OpenAI GPT-4o Live Engine</span>
+        </div>
+        <div class="privacy-pill">
+          <span class="shield-icon">🛡️</span>
+          <span>Zero-Trust Sanitizer Active</span>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <button id="btnHeaderFix" class="btn btn-glow">
+          <span>✨</span> Auto-Fix Bug with GPT-4o
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero / Headline Bar -->
+    <section class="hero-strip">
+      <div class="hero-content">
+        <h1>Turn Hard-to-Reproduce Production Bugs into Passing Regression Tests</h1>
+        <p>Select a real-world scenario below. Trigger the production crash, watch BugTwin capture a sanitized execution trace, and let OpenAI GPT-4o autonomously synthesize a deterministic regression test and verified patch.</p>
+      </div>
+    </section>
+
+    <!-- Scenario Selector Grid -->
+    <section class="scenario-selector-section">
+      <div class="section-title-row">
+        <h2>SELECT REALISTIC SCENARIO</h2>
+        <span class="dim">Click any scenario to load its codebase & environment</span>
+      </div>
+      <div class="scenarios-carousel" id="scenariosContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- Interactive Workbench -->
+    <main class="workbench-layout">
+      <!-- Left Column: Source Code & Execution Crash Simulator -->
+      <section class="pane left-pane">
+        <div class="pane-header">
+          <div class="pane-title">
+            <span class="file-icon">📄</span>
+            <span id="currentFileName">paymentGateway.js</span>
+            <span class="badge badge-warning" id="scenarioDifficulty">Hard to Reproduce</span>
+          </div>
+          <div class="pane-actions">
+            <button id="btnTriggerCrash" class="btn btn-danger-glow">
+              <span>💥</span> Trigger Production Bug
+            </button>
+          </div>
+        </div>
+
+        <!-- Code Editor Display -->
+        <div class="editor-container">
+          <div class="editor-toolbar">
+            <span class="lang-tag">JavaScript / Node.js</span>
+            <span class="dim" id="scenarioCategoryTag">FinTech</span>
+          </div>
+          <pre class="code-view" id="codeDisplay"><code id="codeContent">// Source code will load here...</code></pre>
+        </div>
+
+        <!-- Sanitized Input & Crash Terminal -->
+        <div class="console-box">
+          <div class="console-tab-bar">
+            <span class="tab-label active">SANITIZED TRACE & CRASH LOG</span>
+            <span class="sanitizer-stat" id="sanitizerReport">0 tokens masked / 0 fields redacted</span>
+          </div>
+          <div class="console-view" id="crashConsole">
+            <div class="log-line info">[System] Ready. Click "Trigger Production Bug" to execute the edge-case input.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: BugTwin Autonomous Agent Pipeline (OpenAI Live) -->
+      <section class="pane right-pane">
+        <div class="pane-header">
+          <div class="pane-title">
+            <span class="ai-spark">🤖</span>
+            <span>Autonomous AI Agent Pipeline</span>
+            <span class="badge badge-ai" id="agentBadge">Ready</span>
+          </div>
+          <div class="pane-actions">
+            <button id="btnRunAgent" class="btn btn-primary-glow">
+              <span>⚡</span> Run Full Agent Loop
+            </button>
+          </div>
+        </div>
+
+        <!-- Pipeline Workflow Cards -->
+        <div class="agent-flow-stack">
+          <!-- Stage 1 Card: Root Cause Isolation -->
+          <div class="step-card" id="step1Card">
+            <div class="step-header">
+              <span class="step-num">STAGE 1</span>
+              <h4>Root Cause Isolation</h4>
+              <span class="step-status" id="step1Status">Idle</span>
+            </div>
+            <div class="step-content">
+              <div class="headline-text" id="rcHeadline">Pending bug execution trace...</div>
+              <p class="body-text" id="rcExplanation">BugTwin parses sanitized call stacks, inputs, and recent breadcrumbs to pinpoint why the code broke.</p>
+              <div class="hypothesis-callout" id="rcHypothesisBox" style="display: none;">
+                <span class="callout-label">Reproduction Hypothesis:</span>
+                <span id="rcHypothesis"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage 2 Card: Regression Test Synthesis -->
+          <div class="step-card" id="step2Card">
+            <div class="step-header">
+              <span class="step-num">STAGE 2</span>
+              <h4>Synthesized Regression Test</h4>
+              <button class="btn-sm" id="btnCopyTestCode">Copy Test</button>
+            </div>
+            <div class="step-content">
+              <div class="test-meta">
+                <span class="code-badge" id="testFilename">bugtwin-regression.test.js</span>
+                <span class="dim" id="testRunnerType">Node.js Native Test Runner (node:test)</span>
+              </div>
+              <pre class="test-preview-block"><code id="testCodeBlock">// GPT-4o will generate a self-contained, deterministic regression test here...</code></pre>
+            </div>
+          </div>
+
+          <!-- Stage 3 Card: Verified Code Patch & Sandbox Verification -->
+          <div class="step-card highlight" id="step3Card">
+            <div class="step-header">
+              <span class="step-num">STAGE 3</span>
+              <h4>Sandbox Verification & Code Diff</h4>
+              <span class="badge badge-success" id="sandboxStatusBadge">Unverified</span>
+            </div>
+            <div class="step-content">
+              <div class="verification-pill-bar">
+                <div class="v-pill">
+                  <span class="v-pill-k">Pre-Fix Replay</span>
+                  <span class="v-pill-v red" id="vPreFix">Failed (Confirmed)</span>
+                </div>
+                <div class="v-pill">
+                  <span class="v-pill-k">Post-Fix Replay</span>
+                  <span class="v-pill-v green" id="vPostFix">Passed 100%</span>
+                </div>
+                <div class="v-pill">
+                  <span class="v-pill-k">Sandbox Workspace</span>
+                  <span class="v-pill-v cyan">Ephemeral Isolated</span>
+                </div>
+              </div>
+
+              <div class="diff-title-bar">
+                <span class="diff-title" id="diffSummaryText">Awaiting patch generation...</span>
+              </div>
+              <div class="diff-viewer" id="diffDisplay">
+                <div class="diff-placeholder">Click "Run Full Agent Loop" to synthesize fix and view side-by-side diff.</div>
+              </div>
+
+              <div class="card-footer-actions">
+                <button class="btn btn-outline" id="btnDownloadTest">📥 Download Regression Test</button>
+                <button class="btn btn-success-glow" id="btnSimulatePR">🚀 Simulate GitHub PR</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Floating Toast Notification -->
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

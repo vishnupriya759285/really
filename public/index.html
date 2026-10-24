@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugTwin — Autonomous Bug Reproduction & Regression Testing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="brand-logo">
+          <div class="logo-icon">⚡</div>
+          <div class="brand-text">
+            <span class="brand-title">BugTwin</span>
+            <span class="brand-tag">Autonomous Regression Agent</span>
+          </div>
+        </div>
+        <div class="env-badge" id="systemStatusBadge">
+          <span class="status-dot pulsing"></span>
+          <span id="agentStatusText">Connecting...</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btnReplay" class="btn btn-secondary">
+          <span class="btn-icon">🔁</span> Replay in Sandbox
+        </button>
+        <button id="btnRunFix" class="btn btn-primary">
+          <span class="btn-icon">✨</span> Run AI Fix Pipeline
+        </button>
+        <button id="btnApplyPatch" class="btn btn-success" disabled>
+          <span class="btn-icon">✔</span> Apply Patch to Codebase
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid Content -->
+    <main class="main-layout">
+      <!-- Trace Overview Bar -->
+      <section class="trace-summary-card">
+        <div class="summary-item">
+          <span class="label">ACTIVE TRACE ID</span>
+          <span class="value code-val" id="traceId">No Trace Loaded</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">APPLICATION / TARGET</span>
+          <span class="value" id="appName">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">EXECUTION STATUS</span>
+          <span class="value badge" id="traceStatus">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">ZERO-TRUST SANITIZER</span>
+          <span class="value highlight-text" id="sanitizerStats">0 tokens masked / 0 fields redacted</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">RECORDED NETWORK CALLS</span>
+          <span class="value" id="networkCallCount">0</span>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="tab-agent">
+          <span class="tab-icon">🤖</span> AI Autonomous Agent Loop
+        </button>
+        <button class="tab-btn" data-tab="tab-trace">
+          <span class="tab-icon">🔍</span> Trace & Network Inspector
+        </button>
+        <button class="tab-btn" data-tab="tab-diff">
+          <span class="tab-icon">⚡</span> Code Diff & Patches
+        </button>
+        <button class="tab-btn" data-tab="tab-sandbox">
+          <span class="tab-icon">💻</span> Sandbox Console
+        </button>
+      </div>
+
+      <!-- Tab 1: AI Agent Loop (Default) -->
+      <div id="tab-agent" class="tab-content active">
+        <div class="agent-pipeline-grid">
+          <!-- Stage 1 Card: Root Cause Analysis -->
+          <div class="pipeline-card" id="cardStage1">
+            <div class="card-header">
+              <div class="stage-tag">STAGE 1</div>
+              <h3>Root Cause & Failure Isolation</h3>
+              <span class="badge" id="stage1Status">Pending</span>
+            </div>
+            <div class="card-body">
+              <div class="meta-row">
+                <span class="dim">Category:</span>
+                <span class="bold" id="rcCategory">—</span>
+                <span class="dim" style="margin-left: 15px;">Target:</span>
+                <span class="code-val" id="rcComponent">—</span>
+              </div>
+              <h4 class="headline" id="rcHeadline">Run the AI Fix Pipeline to isolate the root cause</h4>
+              <p class="explanation" id="rcExplanation">BugTwin analyzes captured stack traces, recent breadcrumbs, and network state to deduce the exact point of failure.</p>
+              <div class="hypothesis-box" id="rcHypothesisBox" style="display: none;">
+                <strong>Reproduction Hypothesis:</strong>
+                <p id="rcHypothesis"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage 2 Card: Regression Test Synthesis -->
+          <div class="pipeline-card" id="cardStage2">
+            <div class="card-header">
+              <div class="stage-tag">STAGE 2</div>
+              <h3>Deterministic Regression Test</h3>
+              <span class="badge" id="stage2Status">Pending</span>
+            </div>
+            <div class="card-body">
+              <div class="test-header-bar">
+                <span class="code-val" id="testFilename">test-will-generate.js</span>
+                <button class="btn-copy" id="btnCopyTest">Copy Test Code</button>
+              </div>
+              <pre class="code-block"><code id="testCodePreview">// Regression test will be synthesized here by OpenAI...
+// It will capture the failing condition and assert the proper behavior deterministically.</code></pre>
+            </div>
+          </div>
+
+          <!-- Stage 3 Card: Autonomous Fix & Sandbox Verification -->
+          <div class="pipeline-card full-width" id="cardStage3">
+            <div class="card-header">
+              <div class="stage-tag">STAGE 3</div>
+              <h3>Autonomous Sandbox Repair & Verification Loop</h3>
+              <span class="badge" id="stage3Status">Pending</span>
+            </div>
+            <div class="card-body">
+              <div class="verification-stats" id="verificationStats" style="display: none;">
+                <div class="v-stat">
+                  <span class="v-label">Iterations</span>
+                  <span class="v-val" id="statIterations">1</span>
+                </div>
+                <div class="v-stat">
+                  <span class="v-label">Pre-Fix Test</span>
+                  <span class="v-val text-red" id="statPreFix">Failed (Confirmed)</span>
+                </div>
+                <div class="v-stat">
+                  <span class="v-label">Post-Fix Test</span>
+                  <span class="v-val text-green" id="statPostFix">Passed 100%</span>
+                </div>
+                <div class="v-stat">
+                  <span class="v-label">Sandbox Security</span>
+                  <span class="v-val text-cyan">Isolated Temp Workspace</span>
+                </div>
+              </div>
+              <div class="log-stream-box" id="verificationLogs">
+                <div class="log-entry dim">[BugTwin] Ready to orchestrate autonomous repair. Click "Run AI Fix Pipeline".</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Trace & Network Inspector -->
+      <div id="tab-trace" class="tab-content">
+        <div class="inspector-layout">
+          <!-- Exception Details -->
+          <div class="panel error-panel" id="exceptionPanel">
+            <h3>💥 Captured Unhandled Exception</h3>
+            <div class="error-msg-box" id="errorMsgText">No exception recorded in trace</div>
+            <pre class="stack-block" id="errorStackText">No stack trace available</pre>
+          </div>
+
+          <!-- Network Inspector -->
+          <div class="panel">
+            <h3>🌐 Sanitized Network Interceptions</h3>
+            <div class="network-list" id="networkList">
+              <div class="empty-state">No network calls captured in this trace.</div>
+            </div>
+          </div>
+
+          <!-- Breadcrumbs Timeline -->
+          <div class="panel">
+            <h3>⏱ Breadcrumbs & Console Logs</h3>
+            <div class="breadcrumbs-list" id="breadcrumbsList">
+              <div class="empty-state">No breadcrumbs recorded.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Code Diff & Patches -->
+      <div id="tab-diff" class="tab-content">
+        <div class="diff-container">
+          <div class="diff-header">
+            <h3>Verified Code Patch</h3>
+            <span class="dim" id="diffFilePath">No patch applied yet</span>
+          </div>
+          <div class="diff-viewer" id="diffViewer">
+            <div class="empty-state">Run the AI Fix Pipeline to generate and verify code patches.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Sandbox Console -->
+      <div id="tab-sandbox" class="tab-content">
+        <div class="console-wrapper">
+          <div class="console-header">
+            <span class="console-title">🖥 BugTwin Isolated Subprocess Console</span>
+            <button class="btn-clear" id="btnClearConsole">Clear</button>
+          </div>
+          <div class="console-body" id="consoleOutput">
+            <div class="console-line system">[BugTwin Sandbox] Ephemeral workspace ready.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Global Notification Banner -->
+    <div id="notificationToast" class="toast"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

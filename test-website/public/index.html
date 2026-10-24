@@ -22,9 +22,10 @@
       </div>
       
       <div class="header-right">
-        <div class="really-link-box">
-          <span class="pulse-dot"></span>
-          <span>Really Server: <a href="http://localhost:3000" target="_blank" style="color: #6ee7b7; text-decoration: underline;">http://localhost:3000</a></span>
+        <div class="really-link-box" id="server-status-pill">
+          <span class="pulse-dot" id="server-status-dot"></span>
+          <span>BugTwin Server: <a id="server-status-link" href="http://localhost:3000" target="_blank" style="color: #6ee7b7; text-decoration: underline;">http://localhost:3000</a></span>
+          <button onclick="openServerConfigModal()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; margin-left: 6px;">⚙️ Change</button>
         </div>
         <button id="btn-open-report-manual" class="btn-report-header" onclick="openTelemetryModal()">
           🚨 Send Telemetry Bug Report
@@ -198,7 +199,7 @@
         <div style="margin-bottom: 14px;">
           <strong id="modal-error-title" style="color: #fff; font-size: 15px;">TypeError: Cannot read properties of undefined</strong>
           <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">
-            Target Really Server: <code>http://localhost:3000/api/telemetry</code>
+            Target Endpoint: <code id="modal-target-url">http://localhost:3000/api/telemetry</code>
           </div>
         </div>
 
@@ -227,8 +228,48 @@
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeTelemetryModal()">Dismiss</button>
         <button id="btn-send-to-really" class="btn-send-really" onclick="transmitTelemetryToReally()">
-          🚀 Send to Really Bot Server (Port 3000) →
+          🚀 Send to Really Bot Server →
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Server Configuration Modal -->
+  <div id="server-config-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">⚙️</span>
+          <div>
+            <h3 style="margin: 0; color: #fff;">BugTwin Server Endpoint</h3>
+            <span style="font-size: 12px; color: #94a3b8;">Set where telemetry & bug reports are dispatched</span>
+          </div>
+        </div>
+        <button class="btn-close" onclick="closeServerConfigModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 14px;">
+          Connect this test storefront to your local BugTwin instance or a Cloudflare-hosted instance.
+        </p>
+        
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 6px;">Quick Presets</label>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-cancel" style="flex: 1; padding: 6px;" onclick="setPresetServer('http://localhost:3000')">🏠 Localhost (Port 3000)</button>
+            <button type="button" class="btn-cancel" style="flex: 1; padding: 6px;" onclick="setPresetServer('https://bugtwin-api.your-subdomain.workers.dev')">☁️ Cloudflare</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 6px;">BugTwin Base URL</label>
+          <input type="text" id="config-server-input" placeholder="e.g. https://really-api.pages.dev or http://localhost:3000" style="width: 100%; padding: 10px 12px; background: #060911; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-family: var(--font-mono); font-size: 13px;">
+        </div>
+
+        <div id="connection-test-result" style="display: none; padding: 10px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 10px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="testConnectionFromModal()">🔍 Test Connection</button>
+        <button class="btn-send-really" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="saveServerConfigFromModal()">Save & Apply</button>
       </div>
     </div>
   </div>
@@ -239,7 +280,7 @@
       <div>
         <strong style="color: #10b981; font-size: 14px;">✓ Telemetry Ingested by Gemini Bot!</strong>
         <p id="toast-msg" style="margin: 2px 0 0; font-size: 13px; color: #e2e8f0;">
-          Session created on http://localhost:3000. Gemini Bot generated steps to reproduce and suggestion.
+          Session created. Gemini Bot generated steps to reproduce and suggestion.
         </p>
       </div>
       <a id="toast-link" href="#" target="_blank" class="btn-view-pr">

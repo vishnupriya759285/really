@@ -44,17 +44,24 @@ Respond with a strictly valid JSON object (no markdown formatting, no backticks)
   "pr_description": "detailed PR markdown description explaining the fix and checklist"
 }`;
 
+      // Helper for timeout
+      const withTimeout = (promise, ms) => Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(`API request timed out after ${ms}ms`)), ms))
+      ]);
+
       // Try gemini-3.8-flash first, then gemini-3.5-flash
       let response;
       for (const modelName of ['gemini-3.8-flash', 'gemini-3.5-flash']) {
         try {
-          response = await ai.models.generateContent({
+          console.log(`[Gemini Bot] Querying model ${modelName}...`);
+          response = await withTimeout(ai.models.generateContent({
             model: modelName,
             contents: prompt
-          });
+          }), 10000);
           if (response && response.text) break;
         } catch (modelErr) {
-          console.warn(`[Gemini Bot] Attempt with ${modelName} failed:`, modelErr.message);
+          console.warn(`[Gemini Bot] Attempt with ${modelName} failed or timed out:`, modelErr.message);
         }
       }
 

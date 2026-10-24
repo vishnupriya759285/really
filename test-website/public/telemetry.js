@@ -152,8 +152,59 @@ const TelemetryTracker = {
     };
   },
 
-  // Transmit telemetry to Really server on port 3000
-  async sendToReallyServer(reallyBaseUrl = 'http://localhost:3000') {
+  // Dynamic server URL resolution (Localhost or Cloudflare hosted domain)
+  getServerUrl() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramUrl = urlParams.get('bugtwin') || urlParams.get('server');
+      if (paramUrl) {
+        const clean = paramUrl.replace(/\/+$/, '');
+        localStorage.setItem('bugtwin_server_url', clean);
+        return clean;
+      }
+    } catch {}
+
+    const stored = localStorage.getItem('bugtwin_server_url');
+    if (stored) return stored.replace(/\/+$/, '');
+
+    if (window.__BUG_TWIN_SERVER_URL__) {
+      return window.__BUG_TWIN_SERVER_URL__.replace(/\/+$/, '');
+    }
+
+    return 'http://localhost:3000';
+  },
+
+  setServerUrl(newUrl) {
+    if (!newUrl) return;
+    const clean = newUrl.trim().replace(/\/+$/, '');
+    localStorage.setItem('bugtwin_server_url', clean);
+    return clean;
+  },
+
+  // Check health of BugTwin / Really server
+  async checkHealth(targetUrl = null) {
+    const base = targetUrl || this.getServerUrl();
+    const startTime = performance.now();
+    try {
+      const res = await fetch(`${base}/api/health`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        cache: 'no-store'
+      });
+      const latency = Math.round(performance.now() - startTime);
+      if (res.ok) {
+        const data = await res.json();
+        return { online: true, latency, data, base };
+      }
+      return { online: false, status: res.status, latency, base };
+    } catch (err) {
+      return { online: false, error: err.message, base };
+    }
+  },
+
+  // Transmit telemetry to Really / BugTwin server (dynamic or Cloudflare-hosted)
+  async sendToReallyServer(overrideUrl = null) {
+    const reallyBaseUrl = overrideUrl || this.getServerUrl();
     const payload = this.getReportPayload();
     const res = await fetch(`${reallyBaseUrl}/api/telemetry`, {
       method: 'POST',

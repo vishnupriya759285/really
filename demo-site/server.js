@@ -424,16 +424,17 @@ ${targetCode}`;
   }
 });
 
+// Start BugTwin Primary Dashboard & Ingestion Server
 const server = http.createServer(app);
 let activePort = parseInt(process.env.DEMO_PORT || '5500', 10);
 
 function startServer(p) {
   server.listen(p, () => {
     console.log(`\n======================================================`);
-    console.log(`  🌟 BugTwin Interactive Showcase Demo is LIVE!`);
-    console.log(`  🔗 URL: http://localhost:${p}`);
-    console.log(`  🔑 OpenAI Engine: GPT-4o Connected`);
-    console.log(`======================================================\n`);
+    console.log(`  🌟 BugTwin Dashboard & Telemetry Engine is LIVE!`);
+    console.log(`  🔗 BugTwin Dashboard: http://localhost:${p}`);
+    console.log(`  🔑 Live Engine: Connected`);
+    console.log(`======================================================`);
   });
 }
 
@@ -442,8 +443,37 @@ server.on('error', (err) => {
     activePort += 1;
     startServer(activePort);
   } else {
-    console.error('Server error:', err);
+    console.error('BugTwin Server error:', err);
   }
 });
 
 startServer(activePort);
+
+// Dedicated Target Test Website Server (NovaStore) on Port 5501
+const testApp = express();
+testApp.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/customer-app.html'));
+});
+testApp.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
+const testServer = http.createServer(testApp);
+let activeTestPort = parseInt(process.env.TEST_PORT || '5501', 10);
+
+function startTestServer(p) {
+  testServer.listen(p, () => {
+    console.log(`  🛍️  Target Test Website (NovaStore) is LIVE on Port ${p}!`);
+    console.log(`  🔗 Test Website URL: http://localhost:${p}`);
+    console.log(`======================================================\n`);
+  });
+}
+
+testServer.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    activeTestPort += 1;
+    startTestServer(activeTestPort);
+  } else {
+    console.error('Test Website Server error:', err);
+  }
+});
+
+startTestServer(activeTestPort);

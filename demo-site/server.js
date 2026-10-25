@@ -449,7 +449,7 @@ server.on('error', (err) => {
 
 startServer(activePort);
 
-// Dedicated Target Test Website Server (NovaStore) on Port 5501
+// Dedicated Target Test Website Server (NovaStore) on Port 6000
 const testApp = express();
 testApp.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/customer-app.html'));
@@ -457,7 +457,7 @@ testApp.get('/', (req, res) => {
 testApp.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 const testServer = http.createServer(testApp);
-let activeTestPort = parseInt(process.env.TEST_PORT || '5501', 10);
+let activeTestPort = parseInt(process.env.TEST_PORT || '6000', 10);
 
 function startTestServer(p) {
   testServer.listen(p, () => {

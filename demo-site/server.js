@@ -19,8 +19,8 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 5000;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
-const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 // Preloaded Scenarios
 const SCENARIOS = [
@@ -123,7 +123,7 @@ module.exports = { calculateNextBillingCycle };`,
     testPayload: {
       userId: 'usr_84920',
       userEmail: 'sarah.k@enterprise.io',
-      apiSecret: 'mock_sec_994827104928173928174',
+      apiSecret: 'sk-prod-994827104928173928174',
       startDate: '2026-01-31',
       timezone: 'Asia/Dubai'
     },
@@ -265,18 +265,24 @@ app.get('/api/latest-external-trace', (req, res) => {
   res.json(latestExternalTrace || { status: 'no_trace' });
 });
 
+app.post('/api/clear-trace', (req, res) => {
+  latestExternalTrace = null;
+  res.json({ success: true });
+});
+
 // Run live OpenAI Multi-Stage Pipeline
 app.post('/api/ai-pipeline', async (req, res) => {
-  const { scenarioId, customCode } = req.body;
+  const { scenarioId, customCode, externalTrace } = req.body;
   const scenario = SCENARIOS.find(s => s.id === scenarioId) || SCENARIOS[0];
   const targetCode = customCode || scenario.code;
 
+  const errName = externalTrace?.error?.name || scenario.errorTrace.name;
+  const errMsg = externalTrace?.error?.message || scenario.errorTrace.message;
+  const errStack = externalTrace?.error?.stack || scenario.errorTrace.stack;
+  const payloadData = externalTrace?.error || scenario.testPayload;
+  const targetFile = externalTrace ? 'customerApp.js' : scenario.failingFile;
+
   try {
-    if (!openai) {
-      return res.status(400).json({
-        error: 'OPENAI_API_KEY environment variable is not configured. Please add OPENAI_API_KEY to your .env file.'
-      });
-    }
     // 1. Stage 1: Live Root Cause Analysis via OpenAI GPT-4o
     const systemPrompt1 = `You are BugTwin's Expert Root-Cause Debugging Agent.
 Analyze the sanitized bug execution trace and source code.
@@ -285,7 +291,7 @@ Return valid JSON only matching:
 {
   "summary": "Headline of the bug",
   "category": "null_pointer" | "race_condition" | "timezone_boundary" | "unhandled_schema",
-  "failingFile": "${scenario.failingFile}",
+  "failingFile": "${targetFile}",
   "failingLine": 12,
   "explanation": "Clear technical breakdown of the root cause",
   "reproductionHypothesis": "Exact condition triggering this failure",
@@ -293,16 +299,16 @@ Return valid JSON only matching:
 }`;
 
     const userPrompt1 = `### SANITIZED ERROR
-Name: ${scenario.errorTrace.name}
-Message: ${scenario.errorTrace.message}
+Name: ${errName}
+Message: ${errMsg}
 Stack:
-${scenario.errorTrace.stack}
+${errStack}
 
-### SOURCE CODE (${scenario.failingFile})
+### SOURCE CODE (${targetFile})
 ${targetCode}
 
 ### SANITIZED INPUT PAYLOAD
-${JSON.stringify(scenario.testPayload, null, 2)}`;
+${JSON.stringify(payloadData, null, 2)}`;
 
     const response1 = await openai.chat.completions.create({
       model: 'gpt-4o',

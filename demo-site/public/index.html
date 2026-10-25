@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BugTwin — Live Interactive AI Debugging Showcase</title>
+  <title>BugTwin — Real-Time Production Bug Telemetry & Regression Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
       <div class="nav-center">
         <div class="live-pill">
           <span class="pulse-dot"></span>
-          <span id="openAiStatusLabel">OpenAI GPT-4o Live Engine</span>
+          <span id="openAiStatusLabel">Live Engine</span>
         </div>
         <div class="privacy-pill">
           <span class="shield-icon">🛡️</span>
@@ -35,8 +35,8 @@
       </div>
 
       <div class="nav-right">
-        <button id="btnHeaderFix" class="btn btn-glow">
-          <span>✨</span> Auto-Fix Bug with GPT-4o
+        <button id="btnHeaderFix" class="btn btn-primary" disabled>
+          <span>⚡</span> Auto-Fix Bug with Live Engine
         </button>
       </div>
     </header>
@@ -44,70 +44,90 @@
     <!-- Hero / Headline Bar -->
     <section class="hero-strip">
       <div class="hero-content">
-        <h1>Turn Hard-to-Reproduce Production Bugs into Passing Regression Tests</h1>
-        <p>Select a real-world scenario below. Trigger the production crash, watch BugTwin capture a sanitized execution trace, and let OpenAI GPT-4o autonomously synthesize a deterministic regression test and verified patch.</p>
+        <h1>Production Bug Telemetry & Autonomous Regression Engine</h1>
+        <p>Continuous automated reproduction, root-cause isolation, and verified regression test synthesis.</p>
       </div>
     </section>
 
-    <!-- Scenario Selector Grid -->
-    <section class="scenario-selector-section">
-      <div class="section-title-row">
-        <h2>SELECT REALISTIC SCENARIO</h2>
-        <span class="dim">Click any scenario to load its codebase & environment</span>
+    <!-- Live Incoming Real-Time Trace Alert Banner -->
+    <div id="liveIncomingBanner" class="live-incoming-banner" style="display: none;">
+      <div class="incoming-info">
+        <span class="pulsing-red-dot"></span>
+        <strong id="incomingTitle">⚡ LIVE CRASH RECEIVED FROM TARGET WEBSITE!</strong>
+        <span class="incoming-id" id="incomingTraceId">#bt-ext-...</span>
+        <span class="incoming-app" id="incomingAppName">NovaStore</span>
       </div>
-      <div class="scenarios-carousel" id="scenariosContainer">
-        <!-- Rendered by JS -->
+      <div class="incoming-actions">
+        <button id="btnAutoSolveIncoming" class="btn btn-glow">
+          <span>✨</span> Auto-Solve Real Crash with Live Engine
+        </button>
       </div>
-    </section>
+    </div>
 
     <!-- Interactive Workbench -->
     <main class="workbench-layout">
-      <!-- Left Column: Source Code & Execution Crash Simulator -->
+      <!-- Left Column: Live Incoming Telemetry Stream -->
       <section class="pane left-pane">
         <div class="pane-header">
           <div class="pane-title">
-            <span class="file-icon">📄</span>
-            <span id="currentFileName">paymentGateway.js</span>
-            <span class="badge badge-warning" id="scenarioDifficulty">Hard to Reproduce</span>
-          </div>
-          <div class="pane-actions">
-            <button id="btnTriggerCrash" class="btn btn-danger-glow">
-              <span>💥</span> Trigger Production Bug
-            </button>
+            <span class="file-icon">📡</span>
+            <span id="currentFileName">Live Telemetry Stream</span>
+            <span class="badge badge-ai" id="telemetryStatusBadge">Listening</span>
           </div>
         </div>
 
-        <!-- Code Editor Display -->
-        <div class="editor-container">
-          <div class="editor-toolbar">
-            <span class="lang-tag">JavaScript / Node.js</span>
-            <span class="dim" id="scenarioCategoryTag">FinTech</span>
-          </div>
-          <pre class="code-view" id="codeDisplay"><code id="codeContent">// Source code will load here...</code></pre>
+        <!-- Waiting View (shown when no bug triggered yet) -->
+        <div class="waiting-box" id="waitingBox">
+          <div class="radar-ping"></div>
+          <h3>Listening for Real-Time Production Errors</h3>
+          <p>No crash reported yet. Active telemetry listener is monitoring connected applications. Trigger an issue report or exception on your client to inspect and resolve.</p>
         </div>
 
-        <!-- Sanitized Input & Crash Terminal -->
-        <div class="console-box">
-          <div class="console-tab-bar">
-            <span class="tab-label active">SANITIZED TRACE & CRASH LOG</span>
-            <span class="sanitizer-stat" id="sanitizerReport">0 tokens masked / 0 fields redacted</span>
+        <!-- Active Crash Inspector (hidden until error arrives) -->
+        <div class="active-trace-box" id="activeTraceBox" style="display: none;">
+          <div class="trace-meta-header">
+            <div>
+              <span class="dim">Target App:</span>
+              <strong id="traceAppDisplay">NovaStore</strong>
+            </div>
+            <div>
+              <span class="dim">URL:</span>
+              <span class="code-val" id="traceUrlDisplay">http://localhost:5500/customer-app.html</span>
+            </div>
           </div>
-          <div class="console-view" id="crashConsole">
-            <div class="log-line info">[System] Ready. Click "Trigger Production Bug" to execute the edge-case input.</div>
+
+          <!-- Code View -->
+          <div class="editor-container">
+            <div class="editor-toolbar">
+              <span class="lang-tag" id="failingFileNameTag">customerApp.js</span>
+              <span class="dim" id="scenarioCategoryTag">Production Exception</span>
+            </div>
+            <pre class="code-view" id="codeDisplay"><code id="codeContent">// Crashing code will be populated when trace arrives...</code></pre>
+          </div>
+
+          <!-- Sanitized Input & Crash Terminal -->
+          <div class="console-box">
+            <div class="console-tab-bar">
+              <span class="tab-label active">SANITIZED TRACE & CRASH LOG</span>
+              <span class="sanitizer-stat" id="sanitizerReport">0 tokens masked / 0 fields redacted</span>
+            </div>
+            <div class="console-view" id="crashConsole">
+              <div class="log-line info">[System] Waiting for live incoming crash...</div>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Right Column: BugTwin Autonomous Agent Pipeline (OpenAI Live) -->
+      <!-- Right Column: BugTwin Autonomous Agent Pipeline (Live Engine) -->
       <section class="pane right-pane">
         <div class="pane-header">
           <div class="pane-title">
             <span class="ai-spark">🤖</span>
             <span>Autonomous AI Agent Pipeline</span>
-            <span class="badge badge-ai" id="agentBadge">Ready</span>
+            <span class="badge badge-ai" id="agentBadge">Waiting for Bug</span>
           </div>
           <div class="pane-actions">
-            <button id="btnRunAgent" class="btn btn-primary-glow">
+            <button id="btnRunAgent" class="btn btn-primary-glow" disabled>
               <span>⚡</span> Run Full Agent Loop
             </button>
           </div>
@@ -123,8 +143,8 @@
               <span class="step-status" id="step1Status">Idle</span>
             </div>
             <div class="step-content">
-              <div class="headline-text" id="rcHeadline">Pending bug execution trace...</div>
-              <p class="body-text" id="rcExplanation">BugTwin parses sanitized call stacks, inputs, and recent breadcrumbs to pinpoint why the code broke.</p>
+              <div class="headline-text" id="rcHeadline">Waiting for incoming error trace...</div>
+              <p class="body-text" id="rcExplanation">When a crash occurs in the target app, BugTwin parses the sanitized call stack, inputs, and recent breadcrumbs to isolate the root cause.</p>
               <div class="hypothesis-callout" id="rcHypothesisBox" style="display: none;">
                 <span class="callout-label">Reproduction Hypothesis:</span>
                 <span id="rcHypothesis"></span>
@@ -144,7 +164,7 @@
                 <span class="code-badge" id="testFilename">bugtwin-regression.test.js</span>
                 <span class="dim" id="testRunnerType">Node.js Native Test Runner (node:test)</span>
               </div>
-              <pre class="test-preview-block"><code id="testCodeBlock">// GPT-4o will generate a self-contained, deterministic regression test here...</code></pre>
+              <pre class="test-preview-block"><code id="testCodeBlock">// Live Engine will generate a self-contained, deterministic regression test here...</code></pre>
             </div>
           </div>
 
@@ -175,7 +195,7 @@
                 <span class="diff-title" id="diffSummaryText">Awaiting patch generation...</span>
               </div>
               <div class="diff-viewer" id="diffDisplay">
-                <div class="diff-placeholder">Click "Run Full Agent Loop" to synthesize fix and view side-by-side diff.</div>
+                <div class="diff-placeholder">Trigger an error from the target website to synthesize fix and view side-by-side diff.</div>
               </div>
 
               <div class="card-footer-actions">

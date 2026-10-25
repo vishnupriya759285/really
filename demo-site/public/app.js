@@ -1,18 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-  let scenarios = [];
-  let currentScenario = null;
-  let activeTrace = null;
+  const pageLoadTime = Date.now();
+  let incomingExternalTrace = null;
+  let lastSeenTraceId = null;
   let currentFixResult = null;
 
   // DOM Elements
-  const scenariosContainer = document.getElementById('scenariosContainer');
   const currentFileName = document.getElementById('currentFileName');
-  const scenarioDifficulty = document.getElementById('scenarioDifficulty');
+  const telemetryStatusBadge = document.getElementById('telemetryStatusBadge');
+  const waitingBox = document.getElementById('waitingBox');
+  const activeTraceBox = document.getElementById('activeTraceBox');
+  const traceAppDisplay = document.getElementById('traceAppDisplay');
+  const traceUrlDisplay = document.getElementById('traceUrlDisplay');
+  const failingFileNameTag = document.getElementById('failingFileNameTag');
   const scenarioCategoryTag = document.getElementById('scenarioCategoryTag');
   const codeContent = document.getElementById('codeContent');
   const crashConsole = document.getElementById('crashConsole');
   const sanitizerReport = document.getElementById('sanitizerReport');
-  const btnTriggerCrash = document.getElementById('btnTriggerCrash');
   const btnRunAgent = document.getElementById('btnRunAgent');
   const btnHeaderFix = document.getElementById('btnHeaderFix');
   const agentBadge = document.getElementById('agentBadge');
@@ -37,6 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSimulatePR = document.getElementById('btnSimulatePR');
   const toast = document.getElementById('toast');
 
+  // Real-time Incoming Trace Elements
+  const liveIncomingBanner = document.getElementById('liveIncomingBanner');
+  const incomingTraceId = document.getElementById('incomingTraceId');
+  const incomingAppName = document.getElementById('incomingAppName');
+  const btnAutoSolveIncoming = document.getElementById('btnAutoSolveIncoming');
+
   // Toast notification
   function showToast(msg, duration = 3000) {
     toast.textContent = msg;
@@ -44,139 +53,89 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => toast.classList.remove('show'), duration);
   }
 
-  // Load Scenarios
-  async function loadScenarios() {
+  // 📡 Real-Time Listener: Poll for live incoming crashes from external websites
+  async function pollRealTimeIncomingTraces() {
     try {
-      const res = await fetch('/api/scenarios');
-      scenarios = await res.json();
-      renderScenarioCards();
-      if (scenarios.length > 0) {
-        selectScenario(scenarios[0]);
-      }
-    } catch (err) {
-      console.error('Failed to load scenarios:', err);
-    }
-  }
-
-  // Render Scenario Selection Cards
-  function renderScenarioCards() {
-    scenariosContainer.innerHTML = scenarios.map((sc, idx) => `
-      <div class="scenario-card ${idx === 0 ? 'active' : ''}" data-id="${sc.id}">
-        <div class="sc-card-top">
-          <span class="sc-badge ${sc.id.startsWith('curr') ? 'fintech' : sc.id.startsWith('time') ? 'saas' : 'api'}">${sc.category}</span>
-          <span class="sc-diff">${sc.difficulty}</span>
-        </div>
-        <div class="sc-card-title">${sc.title}</div>
-        <div class="sc-card-desc">${sc.description}</div>
-      </div>
-    `).join('');
-
-    document.querySelectorAll('.scenario-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id = card.dataset.id;
-        const target = scenarios.find(s => s.id === id);
-        if (target) {
-          document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-          selectScenario(target);
-        }
-      });
-    });
-  }
-
-  // Select Scenario
-  function selectScenario(scenario) {
-    currentScenario = scenario;
-    activeTrace = null;
-    currentFixResult = null;
-
-    currentFileName.textContent = scenario.failingFile;
-    scenarioDifficulty.textContent = scenario.difficulty;
-    scenarioCategoryTag.textContent = scenario.category;
-    codeContent.textContent = scenario.code;
-
-    // Reset console
-    crashConsole.innerHTML = `
-      <div class="log-line info">[System] Loaded scenario "${scenario.title}"</div>
-      <div class="log-line info">[System] Target file: ${scenario.failingFile}</div>
-      <div class="log-line info">[System] Click "Trigger Production Bug" to execute inputs.</div>
-    `;
-    sanitizerReport.textContent = '0 tokens masked / 0 fields redacted';
-
-    // Reset agent pipeline
-    agentBadge.textContent = 'Ready';
-    agentBadge.className = 'badge badge-ai';
-    step1Status.textContent = 'Idle';
-    rcHeadline.textContent = 'Pending bug execution trace...';
-    rcExplanation.textContent = 'BugTwin will parse sanitized call stacks, inputs, and recent breadcrumbs.';
-    rcHypothesisBox.style.display = 'none';
-
-    testFilename.textContent = `bugtwin-${scenario.id}.test.js`;
-    testCodeBlock.textContent = '// GPT-4o will synthesize a self-contained regression test here...';
-
-    sandboxStatusBadge.textContent = 'Unverified';
-    sandboxStatusBadge.className = 'badge badge-warning';
-    diffSummaryText.textContent = 'Awaiting patch generation...';
-    diffDisplay.innerHTML = '<div class="diff-placeholder">Click "Run Full Agent Loop" to synthesize fix and view side-by-side diff.</div>';
-  }
-
-  // Trigger Bug Crash Action
-  btnTriggerCrash.addEventListener('click', async () => {
-    if (!currentScenario) return;
-    btnTriggerCrash.disabled = true;
-    btnTriggerCrash.innerHTML = '💥 Triggering Failure...';
-
-    try {
-      const res = await fetch('/api/run-scenario', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenarioId: currentScenario.id })
-      });
+      const res = await fetch('/api/latest-external-trace');
       const trace = await res.json();
-      activeTrace = trace;
 
-      btnTriggerCrash.disabled = false;
-      btnTriggerCrash.innerHTML = '<span>💥</span> Trigger Production Bug';
+      // STRICT TIMING GATE: ONLY trigger if trace was created AFTER the user opened this page
+      if (
+        trace &&
+        trace.traceId &&
+        trace.status !== 'no_trace' &&
+        trace.traceId !== lastSeenTraceId &&
+        trace.timestamp &&
+        trace.timestamp >= pageLoadTime
+      ) {
+        lastSeenTraceId = trace.traceId;
+        incomingExternalTrace = trace;
 
-      // Log to console
-      crashConsole.innerHTML = `
-        <div class="log-line info">[Execution] Inbound request received with authentication credentials...</div>
-        <div class="log-line sanitized">[Zero-Trust Sanitizer] Masked ${trace.sanitizationSummary.tokensMasked} tokens, redacted ${trace.sanitizationSummary.fieldsRedacted} sensitive fields.</div>
-        <div class="log-line crash">[Fatal Exception Caught]: ${trace.error.name}: ${trace.error.message}</div>
-        <div class="log-line stack">${trace.error.stack}</div>
-        <div class="log-line info">[BugTwin Trace] Saved trace bundle: ${trace.traceId} (Ready for AI synthesis)</div>
-      `;
+        // Switch Left Pane from Waiting to Active Crash Inspector
+        waitingBox.style.display = 'none';
+        activeTraceBox.style.display = 'block';
 
-      sanitizerReport.textContent = `Zero-Trust: ${trace.sanitizationSummary.tokensMasked} tokens masked / ${trace.sanitizationSummary.fieldsRedacted} fields redacted`;
-      showToast('💥 Bug triggered! Sanitized execution trace captured.');
-    } catch (err) {
-      btnTriggerCrash.disabled = false;
-      btnTriggerCrash.innerHTML = '<span>💥</span> Trigger Production Bug';
-      showToast('Error triggering bug: ' + err.message);
+        currentFileName.textContent = `${trace.appName} (Crash Inspector)`;
+        telemetryStatusBadge.textContent = 'Crash Captured';
+        telemetryStatusBadge.className = 'badge badge-warning';
+
+        traceAppDisplay.textContent = trace.appName || 'NovaStore App';
+        traceUrlDisplay.textContent = trace.url || 'http://localhost:5500';
+        failingFileNameTag.textContent = trace.error?.name || 'TypeError';
+        scenarioCategoryTag.textContent = 'Live Production Crash';
+
+        // Display crashing code snippet or stack
+        codeContent.textContent = trace.error?.stack || JSON.stringify(trace.error, null, 2);
+
+        // Update console with live incoming crash
+        crashConsole.innerHTML = `
+          <div class="log-line crash">[⚡ REAL-TIME INCOMING CRASH]: ${trace.error?.name || 'Error'}: ${trace.error?.message}</div>
+          <div class="log-line stack">${trace.error?.stack || 'No stack'}</div>
+          <div class="log-line sanitized">[Zero-Trust Sanitizer]: Scrubbed ${trace.sanitizationSummary?.tokensMasked || 0} tokens & ${trace.sanitizationSummary?.fieldsRedacted || 0} sensitive fields from ${trace.appName}!</div>
+          <div class="log-line info">[Origin]: ${trace.url} at ${new Date(trace.timestamp).toLocaleTimeString()}</div>
+        `;
+
+        sanitizerReport.textContent = `Zero-Trust: ${trace.sanitizationSummary?.tokensMasked || 0} tokens masked / ${trace.sanitizationSummary?.fieldsRedacted || 0} fields redacted`;
+
+        // Enable Action Buttons
+        btnRunAgent.disabled = false;
+        btnHeaderFix.disabled = false;
+        agentBadge.textContent = 'Crash Ready to Solve';
+        agentBadge.className = 'badge badge-ai';
+
+        showToast(`⚡ REAL-TIME ERROR RECEIVED from ${trace.appName}! Click "Auto-Fix" to solve!`, 5000);
+      }
+    } catch (e) {
+      // Ignore background poll errors
     }
-  });
+    setTimeout(pollRealTimeIncomingTraces, 1200);
+  }
 
-  // Run AI Agent Loop (Live OpenAI GPT-4o)
+  // Run AI Agent Loop (Live Engine)
   async function runAiPipeline() {
-    if (!currentScenario) return;
+    if (!incomingExternalTrace) {
+      showToast('Waiting for a real crash from target website...');
+      return;
+    }
 
     btnRunAgent.disabled = true;
     btnHeaderFix.disabled = true;
-    btnRunAgent.innerHTML = '✨ GPT-4o Working...';
-    btnHeaderFix.innerHTML = '✨ GPT-4o Working...';
-    agentBadge.textContent = 'Live GPT-4o Processing...';
+    btnRunAgent.innerHTML = '✨ Live Engine Working...';
+    btnHeaderFix.innerHTML = '✨ Live Engine Working...';
+    agentBadge.textContent = 'Live Engine Processing...';
     agentBadge.className = 'badge badge-ai';
 
-    step1Status.textContent = 'Analyzing Stack & Code...';
-    rcHeadline.textContent = 'GPT-4o isolating root cause...';
+    step1Status.textContent = 'Analyzing Real Stack & Payload...';
+    rcHeadline.textContent = 'Live Engine isolating root cause...';
 
     try {
       const res = await fetch('/api/ai-pipeline', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          scenarioId: currentScenario.id,
-          customCode: codeContent.textContent
+          scenarioId: 'currency-rounding',
+          customCode: codeContent.textContent,
+          externalTrace: incomingExternalTrace
         })
       });
 
@@ -184,9 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
       btnRunAgent.disabled = false;
       btnHeaderFix.disabled = false;
       btnRunAgent.innerHTML = '<span>⚡</span> Run Full Agent Loop';
-      btnHeaderFix.innerHTML = '<span>✨</span> Auto-Fix Bug with GPT-4o';
+      btnHeaderFix.innerHTML = '<span>✨</span> Auto-Fix Bug with Live Engine';
 
-      if (!res.ok) throw new Error(data.error || 'OpenAI pipeline error');
+      if (!res.ok) throw new Error(data.error || 'Live Engine pipeline error');
       currentFixResult = data;
 
       // Stage 1 Update
@@ -210,15 +169,15 @@ document.addEventListener('DOMContentLoaded', () => {
       diffSummaryText.textContent = `${data.patch.failingFile}: ${data.patch.diffSummary}`;
 
       renderDiff(data.patch.originalCode, data.patch.patchedCode);
-      showToast('✔ OpenAI GPT-4o synthesized test & verified patch in isolated sandbox!');
+      showToast('✔ Live Engine synthesized test & verified patch in isolated sandbox!');
     } catch (err) {
       btnRunAgent.disabled = false;
       btnHeaderFix.disabled = false;
       btnRunAgent.innerHTML = '<span>⚡</span> Run Full Agent Loop';
-      btnHeaderFix.innerHTML = '<span>✨</span> Auto-Fix Bug with GPT-4o';
+      btnHeaderFix.innerHTML = '<span>✨</span> Auto-Fix Bug with Live Engine';
       agentBadge.textContent = 'Pipeline Error';
       agentBadge.className = 'badge badge-warning';
-      showToast('OpenAI Agent error: ' + err.message);
+      showToast('Live Engine error: ' + err.message);
     }
   }
 
@@ -227,8 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render Code Diff
   function renderDiff(orig, patched) {
-    const origLines = orig.split('\n');
-    const patchedLines = patched.split('\n');
+    const origLines = (orig || '').split('\n');
+    const patchedLines = (patched || '').split('\n');
     let html = '';
 
     origLines.forEach((l) => {
@@ -249,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   // Copy Test
@@ -280,9 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Run the AI agent loop first to produce verified patch.');
       return;
     }
-    showToast(`🚀 Pull Request created: "fix(${currentScenario.id}): ${currentFixResult.patch.diffSummary}" with regression test!`);
+    showToast(`🚀 Pull Request created: "fix(production): ${currentFixResult.patch.diffSummary}" with regression test!`);
   });
 
-  // Initialize
-  loadScenarios();
+  // Start polling
+  pollRealTimeIncomingTraces();
 });
